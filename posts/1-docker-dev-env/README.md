@@ -15,10 +15,11 @@ npm install pg --save
 ```bash
 
 docker run --rm \
---name db \
+--name docker-db \
 -e POSTGRES_DB=test \
 -e POSTGRES_USER=test \
 -e POSTGRES_PASSWORD=test \
+-p 5432:5432 \
 postgres
 ```
 
