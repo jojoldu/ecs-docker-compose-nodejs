@@ -6,6 +6,10 @@ export class UserController {
 
     private userRepository = getRepository(User);
 
+    hello() {
+        return 'hello';
+    }
+
     async all(request: Request, response: Response, next: NextFunction) {
         return this.userRepository.find();
     }

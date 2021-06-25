@@ -17,7 +17,7 @@ RUN apk --no-cache add tzdata && \
         echo "Asia/Seoul" > /etc/timezone
 
 # Create Directory for the Container
-WORKDIR /usr/ecs-docker-compose-nodejs
+WORKDIR /app
 
 # Only copy the package.json file to work directory
 COPY package.json .
