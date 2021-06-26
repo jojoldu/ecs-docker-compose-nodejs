@@ -31,4 +31,6 @@ EXPOSE 3000
 
 # Node ENV
 ENV NODE_ENV=production
-CMD [ "npm", "start" ]
+
+# RUN local or production (or dev)
+ENTRYPOINT ["npm", "run"]

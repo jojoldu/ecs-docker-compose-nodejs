@@ -7,7 +7,7 @@ export class UserController {
     private userRepository = getRepository(User);
 
     hello() {
-        return 'hello';
+        return 'hello2';
     }
 
     async all(request: Request, response: Response, next: NextFunction) {
