@@ -114,12 +114,9 @@ Express server has started on port 3000. Open http://localhost:3000/users to see
 
 ## 2. Docker로 개발환경 구성하기
 
-
 ### 2-1. Dockerfile
 
-```bash
-docker build -t ts-sample .
-```
+현재의 Node 프로젝트를 위한 Dockerfile은 다음과 같이 구성됩니다.
 
 ```dockerfile
 FROM node:16-alpine3.11
@@ -158,8 +155,13 @@ ENV NODE_ENV=production
 CMD [ "npm", "start" ]
 ```
 
-* [알파인 리눅스(Alpine Linux)](https://www.lesstif.com/docker/alpine-linux-35356819.html)
-  * `apt` 혹은 `yum` 으로 패키지를 관리하지 않고 `apk`를 통해 관리합니다.
+대부분의 command는 보시면 그대로 이해가 가능하실 것 같습니다.
+
+* `FROM node:16-alpine3.11` 
+  * Node 16버전이 설치된 [알파인 리눅스(Alpine Linux)](https://www.lesstif.com/docker/alpine-linux-35356819.html) 을 사용합니다.
+  * 알파인 리눅스는 `apt` 혹은 `yum` 으로 패키지를 관리하지 않고 `apk`를 통해 관리합니다.
+* `CMD [ "npm", "start" ]`
+  * `CMD`는 다른 command와 다르게 
 
 ### 2-2. DB 연결
 
@@ -171,6 +173,10 @@ module.exports = {
    "host": process.env.DB_HOST,
    ...
 }
+```
+
+```bash
+docker build -t ts-sample .
 ```
 
 ```bash
