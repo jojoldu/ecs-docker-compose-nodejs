@@ -116,7 +116,9 @@ Express server has started on port 3000. Open http://localhost:3000/users to see
 
 ### 2-1. Dockerfile
 
-현재의 Node 프로젝트를 위한 Dockerfile은 다음과 같이 구성됩니다.
+현재의 Node 프로젝트를 위한 `Dockerfile` 은 다음과 같이 구성됩니다.  
+  
+**Dockerfile**
 
 ```dockerfile
 FROM node:16-alpine3.11
@@ -152,18 +154,64 @@ EXPOSE 3000
 
 # Node ENV
 ENV NODE_ENV=production
-CMD [ "npm", "start" ]
+
+# RUN local or production (or dev)
+ENTRYPOINT ["npm", "run"]
 ```
 
-대부분의 command는 보시면 그대로 이해가 가능하실 것 같습니다.
+대부분의 command는 주석과 함께 보시면 이해가 가능하실 것 같습니다.
 
 * `FROM node:16-alpine3.11` 
   * Node 16버전이 설치된 [알파인 리눅스(Alpine Linux)](https://www.lesstif.com/docker/alpine-linux-35356819.html) 을 사용합니다.
   * 알파인 리눅스는 `apt` 혹은 `yum` 으로 패키지를 관리하지 않고 `apk`를 통해 관리합니다.
-* `CMD [ "npm", "start" ]`
-  * `CMD`는 다른 command와 다르게 
+* `CMD [ "npm", "run" ]`
+  * `CMD`는 다른 command와 다르게 빌드할때 수행되지 않고, **이미지를 실행할때** 수행됩니다.
+  * 즉, 위 Dockerfile로 만든 이미지를 `docker run` 할때 `CMD`가 수행되는데요.
+  * `npm start` 로만 되어있기 때문에 `docker run`을 수행할때 `start` 혹은 `dev` 등을 추가 인자로 등록하면 `npm run start` 혹은 `npm run dev` 로 실행시킬 수 있게 됩니다.
+
+이렇게 만든 Dockerfile을 빌드해봅니다.
+
+```bash
+docker build -t ts-sample .
+```
+
+그럼 아래와 같이 로그가 보이면서 빌드가 진행되는데요.
+
+![docker-build](./images/docker-build.png)
+
+완료가 되면 이제 이 프로젝트를 Docker로 실행할 수 있게 됩니다.  
+  
+```bash
+docker run -it --rm \
+-p 3000:3000 \
+--link docker-db \
+ts-sample \
+start
+```
+
+* `--link docker-db`
+  * 1-2 에서 실행된 `--name docker-db` 의 DB와 연결합니다.
+* `ts-sample`
+  * `docker build` 로 만든 `ts-sample`을 실행합니다.
+* `start`
+  * Dockerfile에 선언된 `ENTRYPOINT` 에서 `npm`, `run` 다음 인자로 사용됩니다.
+  * 합쳐서 `npm run start`로 Docker 가 실행시 명령어가 실행됩니다.
+
+
+```bash
+Error: connect ECONNREFUSED 127.0.0.1:5432
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1133:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5432
+}
+```
 
 ### 2-2. DB 연결
+
+
 
 **ormconfig.js**
 
