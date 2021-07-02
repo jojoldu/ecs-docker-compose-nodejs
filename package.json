@@ -6,8 +6,7 @@
       "@types/jest": "^26.0.23",
       "jest": "^27.0.5",
       "ts-jest": "^27.0.3",
-      "ts-node-dev": "^1.1.6",
-      "tsc-watch": "^4.4.0"
+      "ts-node-dev": "^1.1.8"
    },
    "dependencies": {
       "@types/node": "^15.12.4",
@@ -21,6 +20,6 @@
    },
    "scripts": {
       "start": "ts-node src/index.ts",
-      "local": "ts-node-dev src/index.ts"
+      "local": "ts-node-dev --respawn --transpile-only src/index.ts"
    }
 }

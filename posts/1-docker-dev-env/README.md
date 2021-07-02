@@ -258,7 +258,55 @@ start
 
 ![docker-db-run](./images/docker-db-run.png)
 
+자 여기까지 오면서 한가지 불편한게 느껴지셨을텐데요.  
+**코드가 변경될때마다 Docker build를 수행해야하나**? 라는 생각이 듭니다.  
+  
+그래서 이 부분 역시 개선해보겠습니다.
+
 ### 2-3. 실시간 코드 반영하기
+
+개선의 방법은 다음과 같습니다.  
+
+* 수정할 JS 파일들의 디렉터리를 앱 컨테이너 내부의 소스 코드와 연결하여, 코드를 바꿀 때마다 컨테이너 속 코드도 바뀌게 됩니다.  
+
+docker run 명령어에 아래의 값이 추가됩니다.
+
+```bash
+-v $(pwd):/app/ 
+```
+
+* `-v`, `--volume`
+    * host의 file system과 container의 파일 시스템이 연결됩니다.
+    * ex) `호스트 디렉토리 위치:컨테이너 디렉토리 위치`
+
+그리고 실시간으로 TypeScript 파일의 변경에 맞춰 Express APP의 재실행과 TS Compile을 할 수 있도록 [ts-node-dev](https://www.npmjs.com/package/ts-node-dev) 도 적용합니다.
+
+```bash
+npm i ts-node-dev --save-dev
+```
+
+**package.json**
+
+```json
+"scripts": {
+  "start": "ts-node src/index.ts",
+  "local": "ts-node-dev src/index.ts"
+}
+```
+
+자 그래서 최종적으로 Docker run 명령어는 다음과 같습니다.
+
+```bash
+docker run -it --rm \
+-p 3000:3000 \
+--link docker-db \
+-e DB_HOST=docker-db \
+-v $(pwd):/app/ \
+ts-sample \
+local
+```
+
+### 2-4. 도커 컨테이너 접속
 
 ```bash
 docker ps -a
@@ -295,25 +343,3 @@ drwxr-xr-x    5 root     root          4096 Jun 23 09:38 src
 KST와 한글폰트도 잘 적용되었는지 확인해봅니다.
 
 ![kst](./images/kst.png)
-
-### 자동 재실행
-
-**ts-node-dev**
-
-```bash
-ts-node-dev
-```
-
-```bash
-docker run -it --rm \
--p 3000:3000 \
---link docker-db \
--e DB_HOST=docker-db \
--v $(pwd):/app/ \
-ts-sample
-```
-
-* `-v`, `--volume`
-    * host의 file system과 container의 파일 시스템이 연결됩니다
-    * `/host/some/where:/container/some/where`
-
