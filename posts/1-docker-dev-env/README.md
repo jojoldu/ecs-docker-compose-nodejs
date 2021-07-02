@@ -298,9 +298,10 @@ KST와 한글폰트도 잘 적용되었는지 확인해봅니다.
 
 ### 자동 재실행
 
-Nodemon 적용
-```bash
+**ts-node-dev**
 
+```bash
+ts-node-dev
 ```
 
 ```bash
