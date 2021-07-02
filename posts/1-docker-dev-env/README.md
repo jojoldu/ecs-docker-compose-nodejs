@@ -112,9 +112,9 @@ Express server has started on port 3000. Open http://localhost:3000/users to see
 
 그래서 로컬 PC에 직접 구축한 프로젝트 역시 Docker로 전환해보겠습니다.
 
-## 2. Docker로 개발환경 구성하기
+## 2. Dockerfile로 개발환경 구성하기
 
-### 2-1. Dockerfile
+### 2-1. Dockerfile 생성하기
 
 현재의 Node 프로젝트를 위한 `Dockerfile` 은 다음과 같이 구성됩니다.  
   
@@ -198,6 +198,9 @@ start
   * 합쳐서 `npm run start`로 Docker 가 실행시 명령어가 실행됩니다.
 
 
+위 명령어를 실행해보시면?  
+아래와 같이 **Connection 오류**가 발생합니다.
+
 ```bash
 Error: connect ECONNREFUSED 127.0.0.1:5432
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1133:16) {
@@ -209,10 +212,16 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
 }
 ```
 
-### 2-2. DB 연결
+에러로그에 나와있듯이 이는 접근하고자 하는 DB의 주소가 localhost (127.0.0.1) 이기 때문입니다.  
+Docker 입장에서 localhost는 내 PC일까요?  
+당연하게도 Docker 내부가 localhost 이기 때문에 현재 `ts-sample` Docker 컨테이너 내부에서 PostgreSQL DB를 찾으려했지만 찾지 못하여 발생한 것입니다.  
+  
+이를 해결하려면 DB의 접속 주소를 **link된 DB**로 인식할 수 있도록 코드 변경이 필요합니다.
 
+### 2-2. 다른 Docker의 DB와 연결하기
 
-
+먼저 현재 실행중인 `ts-sample` Docker를 종료하고, 아래와 같이 **ormconfig**파일을 수정합니다.  
+  
 **ormconfig.js**
 
 ```javascript
@@ -223,22 +232,33 @@ module.exports = {
 }
 ```
 
+* 기존의 `localhost` 였던 `host`를 **환경변수**를 사용하도록 변경하였습니다.  
+
+자 이렇게 변경후 다시 Docker Build를 수행합니다.
+
 ```bash
 docker build -t ts-sample .
 ```
+
+그리고 이번에는 **환경변수를 추가**하여서 `run` 해봅니다.
 
 ```bash
 docker run -it --rm \
 -p 3000:3000 \
 --link docker-db \
 -e DB_HOST=docker-db \
-ts-sample
+ts-sample \
+start
 ```
 
-그럼 아래와 같이 
+* `-e DB_HOST=docker-db`
+  * 환경변수 `DB_HOST`에 `docker-db`를 등록합니다.
 
+그럼 아래와 같이 정상적으로 DB가 접근 되는 것을 볼 수 있습니다.
 
-## 실시간 코드 반영
+![docker-db-run](./images/docker-db-run.png)
+
+### 2-3. 실시간 코드 반영하기
 
 ```bash
 docker ps -a
