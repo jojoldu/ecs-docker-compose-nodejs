@@ -11,6 +11,10 @@ NodeJS와 같은 스크립트 언어에서는 개발환경을 구성하고, 이�
 
 그래서 이런 문제점들을 Docker Compose를 통해 개선하고 실제 배포까지 한번 진행해보겠습니다.
 
+
+> 이 컨텐츠는 인프런 강의인 [도커 쓸 땐 필수! 도커 컴포즈](https://www.inflearn.com/course/%EB%8F%84%EC%BB%A4-%EC%BB%B4%ED%8F%AC%EC%A6%88?inst=9acd6a2e) 에서 많은 영감을 얻었습니다.  
+> 강의 제작자이신 [너굴](https://www.facebook.com/raccoonyy) 님의 허가하에 작성하였음을 먼저 말씀드립니다.
+
 ## 1. 기본환경 구성
 
 샘플로 진행할 프로젝트의 스택은 다음과 같이 구성됩니다.
@@ -212,7 +216,7 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
 }
 ```
 
-에러로그에 나와있듯이 이는 접근하고자 하는 DB의 주소가 localhost (127.0.0.1) 이기 때문입니다.  
+에러 로그에 나와있듯이 이는 접근하고자 하는 DB의 주소가 localhost (127.0.0.1) 이기 때문입니다.  
 Docker 입장에서 localhost는 내 PC일까요?  
 당연하게도 Docker 내부가 localhost 이기 때문에 현재 `ts-sample` Docker 컨테이너 내부에서 PostgreSQL DB를 찾으려했지만 찾지 못하여 발생한 것입니다.  
   
@@ -258,12 +262,64 @@ start
 
 ![docker-db-run](./images/docker-db-run.png)
 
+> 만약 현재 실행중인 DB Docker의 데이터가 계속 유지되길 원하신다면 [도커 컴포즈를 활용하여 완벽한 개발 환경 구성하기](https://www.44bits.io/ko/post/almost-perfect-development-environment-with-docker-and-docker-compose#%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%B2%A0%EC%9D%B4%EC%8A%A4-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A5%BC-%EB%B3%B4%EC%A1%B4%ED%95%98%EA%B8%B0) 를 참고해보세요.
+
+### 2-3. Docker 컨테이너 접속
+
+실행된 Docker 컨테이너에 들어가서 설정한 여러 옵션들이 잘 적용되었는지도 한번 체크해봅니다.  
+  
+먼저 현재 접속 중이 Docker Process를 확인해봅니다.
+
+```bash
+docker ps -a
+```
+
+실행중인 앱 컨테이너의 ID를 확인후
+
+![ps](./images/ps.png)
+
+아래 명령어로 접속해봅니다.
+
+```bash
+docker exec -it 21ae5f1d6d9c sh
+```
+
+접속되셨다면 아래 명령어로 현재 디렉토리의 내용을 확인해보는데요.
+
+```bash
+ls -al
+```
+
+그럼 아래와 같이 **현재 프로젝트의 모든 파일이 동일하게 구성**된 것을 볼 수 있습니다.
+
+```bash 
+drwxr-xr-x    1 root     root          4096 Jun 24 09:28 .
+drwxr-xr-x    1 root     root          4096 Jun 23 09:44 ..
+drwxr-xr-x    7 root     root          4096 Jun 24 09:28 .git
+-rw-r--r--    1 root     root            47 Jun 21 11:35 .gitignore
+drwxr-xr-x    2 root     root          4096 Jun 24 09:28 .idea
+-rw-r--r--    1 root     root           843 Jun 23 09:47 Dockerfile
+-rw-r--r--    1 root     root            37 Jun 22 09:31 README.md
+-rw-r--r--    1 root     root           650 Jun 21 11:53 docker-compose.yml
+drwxr-xr-x    1 root     root          4096 Jun 23 09:38 node_modules
+-rw-r--r--    1 root     root           502 Jun 24 09:22 ormconfig.js
+-rw-r--r--    1 root     root        120900 Jun 21 11:58 package-lock.json
+-rw-r--r--    1 root     root           478 Jun 21 11:58 package.json
+drwxr-xr-x    5 root     root          4096 Jun 23 09:38 posts
+drwxr-xr-x    5 root     root          4096 Jun 23 09:38 src
+-rw-r--r--    1 root     root           298 Jun 21 11:35 tsconfig.json
+```
+
+**KST**와 **한글폰트**도 잘 적용되었는지 확인해봅니다.
+
+![kst](./images/kst.png)
+
 자 여기까지 오면서 한가지 불편한게 느껴지셨을텐데요.  
 **코드가 변경될때마다 Docker build를 수행해야하나**? 라는 생각이 듭니다.  
   
 그래서 이 부분 역시 개선해보겠습니다.
 
-### 2-3. 실시간 코드 반영하기
+### 2-4. 실시간 코드 반영하기
 
 개선의 방법은 다음과 같습니다.  
 
@@ -306,40 +362,21 @@ ts-sample \
 local
 ```
 
-### 2-4. 도커 컨테이너 접속
+![docker-reload](./images/docker-reload.png)
 
-```bash
-docker ps -a
-```
+> 현재 (2021.07.03) 위 방법으로 진행할 경우 Docker 내에서는 `ts-node-dev`의 restart가 로컬PC에서 몇배는 더 느립니다.  
+> 로컬 PC에서는 1초 이내에 restart가 되는데, Docker 내에서는 restart시에 5~7초는 걸리기 때문에 이 이슈가 해결되면 별도로 다시 포스팅하겠습니다. 
 
-![ps](./images/ps.png)
+## 3. 마무리
 
-```bash
-docker exec -it 21ae5f1d6d9c sh
-```
+다들 도커가 좋다고는 얘기해서 도커로 개발환경을 한번 구성해보았는데, **이게 정말 좋은게 맞나?**라는 생각이 드실텐데요.  
+  
+여기까지 하면서 다음과 같은 불편함이 느껴지신다면 정확하게 느끼신겁니다.
 
-```bash
-ls -al
-```
+* 각 도커 실행 옵션들을 모두 기억 (혹은 기록)해서 실행해야함
+* DB / Redis 등을 항상 앱 보다 먼저 실행해야함 (순서보장)
+  * 앱을 먼저 실행하면 접속 가능한 DB/Redis가 없어서 실행 실패
 
-```bash 
-drwxr-xr-x    1 root     root          4096 Jun 24 09:28 .
-drwxr-xr-x    1 root     root          4096 Jun 23 09:44 ..
-drwxr-xr-x    7 root     root          4096 Jun 24 09:28 .git
--rw-r--r--    1 root     root            47 Jun 21 11:35 .gitignore
-drwxr-xr-x    2 root     root          4096 Jun 24 09:28 .idea
--rw-r--r--    1 root     root           843 Jun 23 09:47 Dockerfile
--rw-r--r--    1 root     root            37 Jun 22 09:31 README.md
--rw-r--r--    1 root     root           650 Jun 21 11:53 docker-compose.yml
-drwxr-xr-x    1 root     root          4096 Jun 23 09:38 node_modules
--rw-r--r--    1 root     root           502 Jun 24 09:22 ormconfig.js
--rw-r--r--    1 root     root        120900 Jun 21 11:58 package-lock.json
--rw-r--r--    1 root     root           478 Jun 21 11:58 package.json
-drwxr-xr-x    5 root     root          4096 Jun 23 09:38 posts
-drwxr-xr-x    5 root     root          4096 Jun 23 09:38 src
--rw-r--r--    1 root     root           298 Jun 21 11:35 tsconfig.json
-```
+자 그래서 바로 이런 불편함을 해결해줄 **도커 컴포즈**로 개발환경 개선을 다음 시간에 이어서 진행해보겠습니다.
 
-KST와 한글폰트도 잘 적용되었는지 확인해봅니다.
 
-![kst](./images/kst.png)
