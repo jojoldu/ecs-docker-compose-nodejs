@@ -284,30 +284,10 @@ docker ps -a
 docker exec -it 21ae5f1d6d9c sh
 ```
 
-접속되셨다면 아래 명령어로 현재 디렉토리의 내용을 확인해보는데요.
+접속되셨다면 아래 명령어로 현재 디렉토리와 **프로젝트의 모든 파일이 동일하게 구성**되었는지 봅니다.
 
 ```bash
 ls -al
-```
-
-그럼 아래와 같이 **현재 프로젝트의 모든 파일이 동일하게 구성**된 것을 볼 수 있습니다.
-
-```bash 
-drwxr-xr-x    1 root     root          4096 Jun 24 09:28 .
-drwxr-xr-x    1 root     root          4096 Jun 23 09:44 ..
-drwxr-xr-x    7 root     root          4096 Jun 24 09:28 .git
--rw-r--r--    1 root     root            47 Jun 21 11:35 .gitignore
-drwxr-xr-x    2 root     root          4096 Jun 24 09:28 .idea
--rw-r--r--    1 root     root           843 Jun 23 09:47 Dockerfile
--rw-r--r--    1 root     root            37 Jun 22 09:31 README.md
--rw-r--r--    1 root     root           650 Jun 21 11:53 docker-compose.yml
-drwxr-xr-x    1 root     root          4096 Jun 23 09:38 node_modules
--rw-r--r--    1 root     root           502 Jun 24 09:22 ormconfig.js
--rw-r--r--    1 root     root        120900 Jun 21 11:58 package-lock.json
--rw-r--r--    1 root     root           478 Jun 21 11:58 package.json
-drwxr-xr-x    5 root     root          4096 Jun 23 09:38 posts
-drwxr-xr-x    5 root     root          4096 Jun 23 09:38 src
--rw-r--r--    1 root     root           298 Jun 21 11:35 tsconfig.json
 ```
 
 **KST**와 **한글폰트**도 잘 적용되었는지 확인해봅니다.
