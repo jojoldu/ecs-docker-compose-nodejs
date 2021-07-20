@@ -3,7 +3,7 @@
 [앞서 진행된 과정](https://jojoldu.tistory.com/584) 을 통해 **Docker를 통한 독립적인 환경의 장점**은 알게 되었지만, 반면에 직접 하나하나 CLI를 입력하여 Docker를 수행하는것의 불편함도 알게 되었습니다.  
   
 이런 불편함을 겪은건 비단 저희만 그런것은 아니겠죠?  
-이미 이런 불편함을 해결 하기 위해 [도커 컴포즈가 출시](https://docs.docker.com/compose/) 되었습니다.  
+이미 이런 불편함을 해결 하기 위해 [도커 컴포즈](https://docs.docker.com/compose/)가 출시 되었습니다.  
   
 도커 컴포즈는 여러 Docker 애플리케이션을 정의하고 실행하기 위한 도구입니다.  
 이를 활용하면 그동안 저희가 수행했던 CLI 명령어 옵션이나 컨테이너 간 실행 순서등을 파일로서 관리할 수 있게 됩니다.  
@@ -84,15 +84,30 @@ services:
 ### app 서비스 설정
 
 * `build`
+  * DB와 같이 이미지를 사용하는 것이 아니기 때문에 `build`를 사용합니다.
+  * `docker build` 명령어를 수행합니다.
   * `context`
+    * `docker build` 를 실행할 디렉토리입니다.
+    * `.`로 했기 때문에 현재 위치가 됩니다.
   * `dockerfile`
+    * 빌드에 사용될 Dockerfile을 선택합니다.
 * `depends_on`
-  * 하지만 depends_on의 가장 큰 단점이 있는데 PostgreSQL가 완전히 실행되고 준비될때까지 `app`이 기다려야하는데, **PostgreSQL 실행 명령어만 수행되면 바로** `app` **이 수행**되기 때문에 종종 DB를 찾을 수 없다는 메세지가 발생하게 됩니다. 
-  * 때문에 [wait-for-it](https://github.com/vishnubob/wait-for-it/)등을 통해 특정 서버의 특정 포트로 접근할 수 있을 때까지 기다린 뒤에 `app`이 수행되어야만 합니다.
-  *  
+  * 특정 서비스에 대한 의존도를 나타냅니다.
+    * 지정된 서비스가 먼저 시작되도록 합니다.
+  * `depends_on`에는 큰 이슈가 하나 있습니다. 
+    * PostgreSQL가 완전히 실행되고 준비될때까지 `app`이 기다려야하는데, **PostgreSQL 실행 명령어만 수행되면 바로** `app` **이 수행**되기 때문에 종종 DB를 찾을 수 없다는 메세지가 발생하게 됩니다. 
+    * 때문에 [wait-for-it](https://github.com/vishnubob/wait-for-it/)등을 통해 특정 서버의 특정 포트로 접근할 수 있을 때까지 기다린 뒤에 `app`이 수행되어야만 합니다.
+    * 아래에서 좀 더 자세하게 설정 방법을 소개 드립니다. 
 * `ports`
+  * 외부 포트와 컨테이너내 포트를 연결합니다.
+  * `docker run` 명령어의 `-p` 옵션과 동일합니다.
 * `command`
+  * `docker run` 의 마지막 명령어와 동일합니다.
+  * 여기서는 마지막에 입력된 `local`를 등록합니다.
 * `volumes`
+  * 로컬 PC의 디렉토리와 컨테이너 안의 디렉토리를 연결합니다.
+  * [이전 시간](https://jojoldu.tistory.com/584)에 진행된 실시간 코드 반영하기에서 사용된 `-v` (`--volume`) 옵션과 동일합니다. 
+
 
 ### depends_on 완전 실행 대기
 
