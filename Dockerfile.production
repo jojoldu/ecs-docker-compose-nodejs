@@ -23,6 +23,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Copy all other source code to work directory
+COPY . .
+
 # Docker Demon Port Mapping
 EXPOSE 3000
 

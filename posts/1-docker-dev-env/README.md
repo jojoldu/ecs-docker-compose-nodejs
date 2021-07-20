@@ -150,9 +150,6 @@ WORKDIR /app
 COPY package.json .
 RUN npm install
 
-# Copy all other source code to work directory
-COPY . .
-
 # Docker Demon Port Mapping
 EXPOSE 3000
 
@@ -345,7 +342,7 @@ local
 ![docker-reload](./images/docker-reload.png)
 
 > 현재 (2021.07.03) 위 방법으로 진행할 경우 Docker 내에서는 `ts-node-dev`의 restart가 로컬PC에서 몇배는 더 느립니다.  
-> 로컬 PC에서는 1초 이내에 restart가 되는데, Docker 내에서는 restart시에 5~7초는 걸리기 때문에 이 이슈가 해결되면 별도로 다시 포스팅하겠습니다. 
+> 로컬 PC에서는 1초 이내에 restart가 되는데, Docker 내에서는 restart시에 2~3초는 걸리기 때문에 이 이슈가 해결되면 별도로 다시 포스팅하겠습니다. 
 
 ## 3. 마무리
 
