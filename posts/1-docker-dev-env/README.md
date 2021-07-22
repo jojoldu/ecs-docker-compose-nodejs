@@ -44,18 +44,18 @@ npm install pg --save
 
 ```bash
 📦 ecs-docker-compose-nodejs
-├─ .gitignore
-├─ ormconfig.json
-├─ package-lock.json
-├─ package.json
-├─ src
-│  ├─ controller
-│  │  └─ UserController.ts
-│  ├─ entity
-│  │  └─ User.ts
-│  ├─ index.ts
-│  └─ routes.ts
-└─ tsconfig.json
+├─ .gitignore
+├─ ormconfig.json
+├─ package-lock.json
+├─ package.json
+├─ src
+│  ├─ controller
+│  │  └─ UserController.ts
+│  ├─ entity
+│  │  └─ User.ts
+│  ├─ index.ts
+│  └─ routes.ts
+└─ tsconfig.json
 ```
 
 기본 프로젝트 구성이 끝났으니, 테스트로 연결해볼 DB를 실행해보겠습니다.
@@ -134,6 +134,9 @@ RUN wget http://cdn.naver.com/naver/NanumFont/fontfiles/NanumFont_TTF_ALL.zip
 RUN unzip NanumFont_TTF_ALL.zip -d /usr/share/fonts/nanumfont
 RUN fc-cache -f && rm -rf /var/cache/*
 
+# bash install
+RUN apk add bash
+
 # Language
 ENV LANG=ko_KR.UTF-8 \
     LANGUAGE=ko_KR.UTF-8
@@ -155,9 +158,6 @@ EXPOSE 3000
 
 # Node ENV
 ENV NODE_ENV=production
-
-# RUN local or production (or dev)
-ENTRYPOINT ["npm", "run"]
 ```
 
 대부분의 command는 주석과 함께 보시면 이해가 가능하실 것 같습니다.
@@ -165,10 +165,6 @@ ENTRYPOINT ["npm", "run"]
 * `FROM node:16-alpine3.11` 
   * Node 16버전이 설치된 [알파인 리눅스(Alpine Linux)](https://www.lesstif.com/docker/alpine-linux-35356819.html) 을 사용합니다.
   * 알파인 리눅스는 `apt` 혹은 `yum` 으로 패키지를 관리하지 않고 `apk`를 통해 관리합니다.
-* `CMD [ "npm", "run" ]`
-  * `CMD`는 다른 command와 다르게 빌드할때 수행되지 않고, **이미지를 실행할때** 수행됩니다.
-  * 즉, 위 Dockerfile로 만든 이미지를 `docker run` 할때 `CMD`가 수행되는데요.
-  * `npm start` 로만 되어있기 때문에 `docker run`을 수행할때 `start` 혹은 `dev` 등을 추가 인자로 등록하면 `npm run start` 혹은 `npm run dev` 로 실행시킬 수 있게 됩니다.
 
 이렇게 만든 Dockerfile을 빌드해봅니다.
 
@@ -187,17 +183,15 @@ docker run -it --rm \
 -p 3000:3000 \
 --link docker-db \
 ts-sample \
-start
+npm run start
 ```
 
 * `--link docker-db`
   * 1-2 에서 실행된 `--name docker-db` 의 DB와 연결합니다.
 * `ts-sample`
   * `docker build` 로 만든 `ts-sample`을 실행합니다.
-* `start`
-  * Dockerfile에 선언된 `ENTRYPOINT` 에서 `npm`, `run` 다음 인자로 사용됩니다.
-  * 합쳐서 `npm run start`로 Docker 가 실행시 명령어가 실행됩니다.
-
+* `npm run start`
+  * Docker 컨테이너가 실행시 `npm run start`로 명령어가 실행됩니다.
 
 위 명령어를 실행해보시면?  
 아래와 같이 **Connection 오류**가 발생합니다.
@@ -249,7 +243,7 @@ docker run -it --rm \
 --link docker-db \
 -e DB_HOST=docker-db \
 ts-sample \
-start
+npm run start
 ```
 
 * `-e DB_HOST=docker-db`
@@ -336,7 +330,7 @@ docker run -it --rm \
 -e DB_HOST=docker-db \
 -v $(pwd):/app/ \
 ts-sample \
-local
+npm run local
 ```
 
 ![docker-reload](./images/docker-reload.png)
