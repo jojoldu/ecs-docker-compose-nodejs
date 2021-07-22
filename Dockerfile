@@ -7,6 +7,9 @@ RUN wget http://cdn.naver.com/naver/NanumFont/fontfiles/NanumFont_TTF_ALL.zip
 RUN unzip NanumFont_TTF_ALL.zip -d /usr/share/fonts/nanumfont
 RUN fc-cache -f && rm -rf /var/cache/*
 
+# bash install
+RUN apk add bash
+
 # Language
 ENV LANG=ko_KR.UTF-8 \
     LANGUAGE=ko_KR.UTF-8
@@ -25,7 +28,7 @@ RUN npm install
 
 # wait-for-it.sh
 COPY wait-for-it.sh ./
-RUN chmod +x /wait-for-it.sh
+RUN chmod +x wait-for-it.sh
 
 # Docker Demon Port Mapping
 EXPOSE 3000
@@ -33,4 +36,3 @@ EXPOSE 3000
 # Node ENV
 ENV NODE_ENV=production
 
-CMD ["npm", "run", "local"]

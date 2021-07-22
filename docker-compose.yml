@@ -23,6 +23,11 @@ services:
       - db
     ports:
       - "3000:3000"
-    command: ["./wait-for-it.sh", "db:5432", "--", "npm run local"]
+    command:
+      - bash
+      - -c
+      - |
+        /app/wait-for-it.sh db:5432 -t 10
+        npm run local
     volumes:
       - ./:/app/
